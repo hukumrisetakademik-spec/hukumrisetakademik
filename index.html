@@ -705,6 +705,27 @@ let articles = [], categories = [], volumes = [], pendingAction = null;
 window.addEventListener('load', function() {
   sb = window.supabase.createClient(SB_URL, SB_KEY);
 
+  // Cek session yang sudah ada (misal setelah redirect dari Google)
+  sb.auth.getSession().then(function(r) {
+    if (r.data && r.data.session) {
+      currentUser = r.data.session.user;
+      sb.from('profiles').select('role,full_name').eq('id', currentUser.id).single()
+        .then(function(pr) {
+          if (pr.data) {
+            isAdmin = pr.data.role === 'admin';
+            updateNav(pr.data.full_name || currentUser.email);
+          } else {
+            // Profil belum ada, buat otomatis
+            var name = currentUser.user_metadata && currentUser.user_metadata.full_name
+              ? currentUser.user_metadata.full_name
+              : currentUser.email;
+            sb.from('profiles').upsert({ id: currentUser.id, full_name: name, email: currentUser.email, role: 'author' }).then(function(){});
+            updateNav(name);
+          }
+        }).catch(function(){ updateNav(currentUser.email); });
+    }
+  }).catch(function(){});
+
   sb.auth.onAuthStateChange(function(event, session) {
     if (session) {
       currentUser = session.user;
@@ -713,8 +734,15 @@ window.addEventListener('load', function() {
           if (r.data) {
             isAdmin = r.data.role === 'admin';
             updateNav(r.data.full_name || currentUser.email);
+          } else {
+            // Profil belum ada, buat otomatis (untuk login Google)
+            var name = currentUser.user_metadata && currentUser.user_metadata.full_name
+              ? currentUser.user_metadata.full_name
+              : currentUser.email;
+            sb.from('profiles').upsert({ id: currentUser.id, full_name: name, email: currentUser.email, role: 'author' }).then(function(){});
+            updateNav(name);
           }
-        }).catch(function(){});
+        }).catch(function(){ updateNav(currentUser.email); });
     } else {
       currentUser = null;
       isAdmin = false;
