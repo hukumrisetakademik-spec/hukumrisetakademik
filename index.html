@@ -302,9 +302,9 @@ tr:hover td { background: #fafafa; }
             <button class="btn btn-white-outline" onclick="goPage('articles')">Lihat Arsip</button>
           </div>
           <div class="hero-stats">
-            <div><div class="hero-stat-num" id="heroTotal">0</div><div class="hero-stat-label">Artikel</div></div>
-            <div><div class="hero-stat-num" id="heroVol">0</div><div class="hero-stat-label">Volume</div></div>
-            <div><div class="hero-stat-num" id="heroAuthors">0</div><div class="hero-stat-label">Penulis</div></div>
+            <div><div class="hero-stat-num" id="heroTotal">-</div><div class="hero-stat-label">Artikel</div></div>
+            <div><div class="hero-stat-num" id="heroVol">-</div><div class="hero-stat-label">Volume</div></div>
+            <div><div class="hero-stat-num" id="heroAuthors">-</div><div class="hero-stat-label">Penulis</div></div>
           </div>
         </div>
         <div class="hero-card">
@@ -321,9 +321,7 @@ tr:hover td { background: #fafafa; }
         <h2><span>Artikel</span> Terbaru</h2>
         <button class="btn btn-outline" onclick="goPage('articles')">Lihat Semua</button>
       </div>
-      <div class="articles-grid" id="homeArticles">
-        <div class="empty-state">Memuat artikel...</div>
-      </div>
+      <div class="articles-grid" id="homeArticles"></div>
     </section>
   </div>
 
@@ -383,9 +381,7 @@ tr:hover td { background: #fafafa; }
         </select>
         <input class="filter-search" id="filterSearch" placeholder="Cari judul atau penulis..." oninput="filterArticles()">
       </div>
-      <div class="articles-grid" id="archiveArticles">
-        <div class="empty-state">Memuat artikel...</div>
-      </div>
+      <div class="articles-grid" id="archiveArticles"></div>
     </div>
   </div>
 
@@ -437,9 +433,7 @@ tr:hover td { background: #fafafa; }
         <p>Informasi terbaru dari redaksi HUKRA</p>
       </div>
     </div>
-    <div class="announce-list" id="announceList">
-      <div class="empty-state">Memuat pengumuman...</div>
-    </div>
+    <div class="announce-list" id="announceList"></div>
   </div>
 
   <footer>
