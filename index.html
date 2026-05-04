@@ -759,6 +759,8 @@ function initSupabase() {
 // APP INIT
 // ============================================================
 async function init() {
+  // Paksa loading hilang maksimal 5 detik
+  setTimeout(hideLoading, 5000);
   const configured = initSupabase();
   
   if (!configured) {
@@ -801,12 +803,17 @@ async function init() {
     }
   });
 
-  await Promise.all([
-    loadCategories(),
-    loadVolumes(),
-    loadArticles(),
-    loadAnnouncements()
-  ]);
+  try {
+    await Promise.all([
+      loadCategories(),
+      loadVolumes(),
+      loadArticles(),
+      loadAnnouncements()
+    ]);
+  } catch(e) {
+    console.warn('Load error:', e);
+    loadDemoData();
+  }
 
   hideLoading();
 }
