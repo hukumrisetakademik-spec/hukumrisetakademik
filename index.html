@@ -759,35 +759,26 @@ function initSupabase() {
 // APP INIT
 // ============================================================
 async function init() {
-  // Paksa loading hilang maksimal 5 detik
-  setTimeout(hideLoading, 5000);
+  // Sembunyikan loading LANGSUNG — tidak tunggu Supabase
+  hideLoading();
+
   const configured = initSupabase();
   
   if (!configured) {
-    // Mode demo — gunakan data lokal
-    console.warn('Supabase belum dikonfigurasi. Berjalan dalam mode demo.');
     loadDemoData();
-    hideLoading();
     return;
   }
 
-  // Cek session login
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    // Cek apakah admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, full_name')
-      .eq('id', currentUser.id)
-      .single();
-    if (profile?.role === 'admin') isAdmin = true;
-    updateNavUI(profile?.full_name || currentUser.email);
-  }
+  // Load data tanpa blokir UI
+  loadCategories().catch(() => {});
+  loadVolumes().catch(() => {});
+  loadArticles().catch(() => {});
+  loadAnnouncements().catch(() => {});
 
-  // Auth state listener
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+  // Cek session di background
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
       currentUser = session.user;
       const { data: profile } = await supabase
         .from('profiles')
@@ -796,26 +787,27 @@ async function init() {
         .single();
       if (profile?.role === 'admin') isAdmin = true;
       updateNavUI(profile?.full_name || currentUser.email);
+    }
+  } catch(e) {}
+
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, full_name')
+          .eq('id', currentUser.id)
+          .single();
+        if (profile?.role === 'admin') isAdmin = true;
+        updateNavUI(profile?.full_name || currentUser.email);
+      } catch(e) {}
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       isAdmin = false;
       updateNavUI(null);
     }
   });
-
-  try {
-    await Promise.all([
-      loadCategories(),
-      loadVolumes(),
-      loadArticles(),
-      loadAnnouncements()
-    ]);
-  } catch(e) {
-    console.warn('Load error:', e);
-    loadDemoData();
-  }
-
-  hideLoading();
 }
 
 function hideLoading() {
